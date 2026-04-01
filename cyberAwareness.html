@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚠️ SYSTEM COMPROMISED</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green: #00ff41;
+      --dark-green: #003b00;
+      --red: #ff0033;
+      --black: #050a00;
+      --dim-green: rgba(0, 255, 65, 0.15);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--black);
+      color: var(--green);
+      font-family: 'Share Tech Mono', monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Scanlines */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.15) 2px,
+        rgba(0,0,0,0.15) 4px
+      );
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* Matrix rain canvas */
+    #matrix {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      opacity: 0.12;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 10;
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 40px 24px 60px;
+    }
+
+    /* Top bar */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--green);
+      padding-bottom: 10px;
+      margin-bottom: 36px;
+      font-size: 0.7rem;
+      opacity: 0.6;
+      letter-spacing: 0.08em;
+    }
+
+    .blink {
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    /* Main skull / icon */
+    .skull {
+      text-align: center;
+      font-size: 6rem;
+      margin-bottom: 16px;
+      animation: shake 0.4s ease-in-out infinite alternate;
+      filter: drop-shadow(0 0 20px var(--red));
+    }
+    @keyframes shake {
+      from { transform: translateX(-3px) rotate(-2deg); }
+      to   { transform: translateX(3px)  rotate(2deg);  }
+    }
+
+    /* HACKED headline */
+    .headline {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(2.8rem, 10vw, 6rem);
+      font-weight: 900;
+      text-align: center;
+      color: var(--red);
+      text-shadow:
+        0 0 10px var(--red),
+        0 0 40px rgba(255,0,51,0.5),
+        0 0 80px rgba(255,0,51,0.2);
+      letter-spacing: 0.1em;
+      animation: glitch 3s infinite;
+      margin-bottom: 6px;
+    }
+
+    @keyframes glitch {
+      0%, 90%, 100% { clip-path: none; transform: none; }
+      91% { clip-path: polygon(0 20%, 100% 20%, 100% 40%, 0 40%); transform: translateX(-4px); }
+      92% { clip-path: polygon(0 60%, 100% 60%, 100% 80%, 0 80%); transform: translateX(4px); }
+      93% { clip-path: none; transform: none; }
+    }
+
+    .subhead {
+      text-align: center;
+      font-size: 0.85rem;
+      letter-spacing: 0.3em;
+      color: var(--green);
+      opacity: 0.7;
+      margin-bottom: 40px;
+      text-transform: uppercase;
+    }
+
+    /* Fake terminal box */
+    .terminal {
+      background: rgba(0, 20, 0, 0.7);
+      border: 1px solid var(--green);
+      border-radius: 4px;
+      padding: 20px 24px;
+      margin-bottom: 32px;
+      box-shadow: 0 0 30px var(--dim-green), inset 0 0 20px rgba(0,255,65,0.04);
+    }
+
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(0,255,65,0.2);
+      font-size: 0.7rem;
+      opacity: 0.6;
+    }
+
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .dot-red { background: #ff5f57; }
+    .dot-yellow { background: #ffbd2e; }
+    .dot-green-btn { background: #28c840; }
+
+    .terminal p {
+      font-size: 0.82rem;
+      line-height: 1.8;
+      color: var(--green);
+    }
+
+    .terminal .prompt::before { content: '> '; color: #00aa30; }
+    .terminal .error { color: var(--red); }
+    .terminal .warning { color: #ffcc00; }
+    .terminal .dim { opacity: 0.5; }
+
+    /* Progress bars */
+    .progress-section {
+      margin: 18px 0 0;
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      margin-bottom: 4px;
+      opacity: 0.8;
+    }
+    .progress-bar {
+      height: 6px;
+      background: rgba(0,255,65,0.1);
+      border: 1px solid rgba(0,255,65,0.3);
+      border-radius: 2px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--green);
+      box-shadow: 0 0 6px var(--green);
+      animation: fill-bar 2.5s ease-out forwards;
+      width: 0;
+    }
+    .progress-fill.red-fill {
+      background: var(--red);
+      box-shadow: 0 0 6px var(--red);
+    }
+    @keyframes fill-bar { to { width: var(--target-width); } }
+
+    /* Reveal section */
+    .reveal {
+      border: 2px solid #ffcc00;
+      border-radius: 4px;
+      padding: 24px;
+      background: rgba(255, 204, 0, 0.04);
+      margin-bottom: 32px;
+      position: relative;
+    }
+
+    .reveal::before {
+      content: 'PLOT TWIST';
+      position: absolute;
+      top: -12px;
+      left: 20px;
+      background: var(--black);
+      padding: 0 10px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.65rem;
+      color: #ffcc00;
+      letter-spacing: 0.2em;
+    }
+
+    .reveal-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.4rem;
+      color: #ffcc00;
+      margin-bottom: 12px;
+      text-shadow: 0 0 15px rgba(255,204,0,0.4);
+    }
+
+    .reveal p {
+      font-size: 0.85rem;
+      line-height: 1.85;
+      color: rgba(0,255,65,0.85);
+    }
+
+    .reveal p + p { margin-top: 10px; }
+
+    .highlight { color: #ffcc00; font-weight: bold; }
+    .red-text { color: var(--red); }
+
+    /* Tips grid */
+    .tips-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.85rem;
+      letter-spacing: 0.15em;
+      color: var(--green);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(0,255,65,0.2);
+    }
+
+    .tips {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-bottom: 36px;
+    }
+
+    .tip {
+      border: 1px solid rgba(0,255,65,0.25);
+      border-radius: 4px;
+      padding: 14px 16px;
+      background: rgba(0,255,65,0.03);
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .tip:hover {
+      border-color: var(--green);
+      background: rgba(0,255,65,0.07);
+    }
+    .tip-icon { font-size: 1.4rem; margin-bottom: 6px; }
+    .tip-text { font-size: 0.78rem; line-height: 1.6; opacity: 0.85; }
+    .tip-text strong { color: var(--green); display: block; margin-bottom: 3px; font-size: 0.8rem; }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      font-size: 0.68rem;
+      opacity: 0.35;
+      letter-spacing: 0.1em;
+      border-top: 1px solid rgba(0,255,65,0.15);
+      padding-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="matrix"></canvas>
+
+<div class="container">
+
+  <div class="topbar">
+    <span>SYS://ALERT — INTRUSION DETECTED</span>
+    <span id="clock"></span>
+    <span class="blink">■ LIVE</span>
+  </div>
+
+  <div class="skull">💀</div>
+
+  <h1 class="headline">YOU'VE BEEN HACKED</h1>
+  <p class="subhead">[ security breach confirmed — all your base are belong to us ]</p>
+
+  <div class="terminal">
+    <div class="terminal-header">
+      <span class="dot dot-red"></span>
+      <span class="dot dot-yellow"></span>
+      <span class="dot dot-green-btn"></span>
+      <span style="margin-left:8px">root@h4x0r:~$</span>
+    </div>
+    <p class="prompt">Initialising exploit framework...</p>
+    <p class="prompt">Scanning target... <span class="warning">user found: YOU</span></p>
+    <p class="prompt">Bypassing firewall... <span class="error">done (it was not hard)</span></p>
+    <p class="prompt">Exfiltrating files... <span class="warning">all of them</span></p>
+    <p class="prompt dim">Stealing passwords... transferring cats folder... uploading your browser history... 👀</p>
+    <p class="prompt">Access level achieved: <span class="error">TOTAL DOMINATION</span> <span class="blink">_</span></p>
+
+    <div class="progress-section">
+      <div class="progress-label"><span>Encrypting your hard drive</span><span class="error">100%</span></div>
+      <div class="progress-bar"><div class="progress-fill red-fill" style="--target-width:100%"></div></div>
+
+      <div class="progress-label"><span>Sending data to mysterious server</span><span class="warning">94%</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="--target-width:94%; animation-delay:0.3s"></div></div>
+
+      <div class="progress-label"><span>Forwarding your emails to a villain</span><span class="warning">87%</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="--target-width:87%; animation-delay:0.6s"></div></div>
+    </div>
+  </div>
+
+  <div class="reveal">
+    <div class="reveal-title">🎉 APRIL FOOLS! You're probably fine!</div>
+    <p>
+      Nothing actually happened. Your files are intact, your passwords are safe, and we have not — despite what the progress bars suggest — stolen your cats folder.
+    </p>
+    <p>
+      <span class="highlight">This was a cyber awareness exercise</span>, sent as part of the company newsletter. You clicked a link. That's okay! It happens to everyone. The point is: <span class="red-text">real attackers use exactly this kind of link</span> — dressed up as something familiar, buried in an email, counting on you to click without thinking.
+    </p>
+    <p>
+      The good news: now you know what to look for. The slightly less good news: so does the IT team, who is absolutely keeping a tally. 📋
+    </p>
+  </div>
+
+  <p class="tips-title">// HOW TO NOT GET ACTUALLY HACKED</p>
+  <div class="tips">
+    <div class="tip">
+      <div class="tip-icon">🔗</div>
+      <div class="tip-text"><strong>Hover before you click</strong>Check where a link actually goes before opening it. The display text and the destination are two very different things.</div>
+    </div>
+    <div class="tip">
+      <div class="tip-icon">📧</div>
+      <div class="tip-text"><strong>Sceptical of urgency</strong>"Your account will be deleted in 24 hours!" is a pressure tactic. Real systems send polite reminders. Twice.</div>
+    </div>
+    <div class="tip">
+      <div class="tip-icon">🔑</div>
+      <div class="tip-text"><strong>Use a password manager</strong>If your password is your dog's name plus a number, a bored teenager can crack it over lunch.</div>
+    </div>
+    <div class="tip">
+      <div class="tip-icon">📱</div>
+      <div class="tip-text"><strong>Enable 2FA everywhere</strong>Two-factor authentication means a stolen password alone isn't enough. Add it to email and key accounts today.</div>
+    </div>
+    <div class="tip">
+      <div class="tip-icon">📣</div>
+      <div class="tip-text"><strong>Report, don't delete</strong>If something looks phishy (yes, really), forward it to IT. Deleting quietly helps no one. You might save a colleague.</div>
+    </div>
+    <div class="tip">
+      <div class="tip-icon">🧠</div>
+      <div class="tip-text"><strong>When in doubt, don't</strong>The single most effective cyber defence is a two-second pause before clicking anything unexpected.</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>THIS PAGE IS A SIMULATED PHISHING EXERCISE &nbsp;|&nbsp; NO DATA WAS COLLECTED &nbsp;|&nbsp; NO HARM DONE</p>
+    <p style="margin-top:6px">Questions? Contact Ben and Henry.</p>
+  </div>
+
+</div>
+
+<script>
+  // Clock
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('clock').textContent =
+      now.toISOString().replace('T', ' ').split('.')[0] + ' UTC';
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // Matrix rain
+  const canvas = document.getElementById('matrix');
+  const ctx = canvas.getContext('2d');
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ01ABCDEFGHIJKLMNOPQRSTUVWXYZ<>/\\[]{}|';
+  const fontSize = 13;
+  let columns = Math.floor(canvas.width / fontSize);
+  let drops = Array(columns).fill(1);
+
+  function drawMatrix() {
+    ctx.fillStyle = 'rgba(5,10,0,0.05)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#00ff41';
+    ctx.font = fontSize + 'px "Share Tech Mono", monospace';
+    for (let i = 0; i < drops.length; i++) {
+      const text = chars[Math.floor(Math.random() * chars.length)];
+      ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
+    }
+  }
+  setInterval(drawMatrix, 50);
+</script>
+
+</body>
+</html>
